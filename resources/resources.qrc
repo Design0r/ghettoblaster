@@ -1,0 +1,15 @@
+<RCC>
+  <qresource>
+    <file>icons/tabler-icon-reload.png</file>
+    <file>icons/tabler-icon-folder-open.png</file>
+    <file>icons/tabler-icon-copy.png</file>
+    <file>icons/tabler-icon-file-export.png</file>
+    <file>icons/tabler-icon-file-import.png</file>
+    <file>icons/tabler-icon-file-plus.png</file>
+    <file>icons/tabler-icon-file-check.png</file>
+    <file>icons/tabler-icon-file-x.png</file>
+    <file>icons/tabler-icon-player-play.png</file>
+    <file>icons/tabler-icon-settings.png</file>
+    <file>icons/tabler-icon-trash.png</file>
+  </qresource>
+</RCC>
