@@ -11,5 +11,7 @@
     <file>icons/tabler-icon-player-play.png</file>
     <file>icons/tabler-icon-settings.png</file>
     <file>icons/tabler-icon-trash.png</file>
+    <file>icons/folder-open.png</file>
+    <file>icons/device-floppy.png</file>
   </qresource>
 </RCC>

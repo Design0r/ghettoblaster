@@ -1,21 +1,21 @@
-from PySide2.QtWidgets import (
-    QCheckBox,
-    QFormLayout,
-    QAbstractSpinBox,
-    QLineEdit,
-    QHBoxLayout,
-    QWidget,
-    QComboBox,
-    QGroupBox,
-    QVBoxLayout,
-    QSpinBox,
-    QFileDialog,
-)
-from PySide2.QtCore import Qt, Signal
-from ghettoblaster.ui.keyword_linedit import KeywordLineedit
-from ghettoblaster.ui.buttons import IconButton
-from ghettoblaster.controller.playblast import Playblast
 from ghettoblaster.controller import maya_cmds
+from ghettoblaster.controller.playblast import Playblast
+from ghettoblaster.ui.buttons import IconButton
+from ghettoblaster.ui.keyword_linedit import KeywordLineedit
+from Qt.QtCore import Qt, Signal
+from Qt.QtWidgets import (
+    QAbstractSpinBox,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLineEdit,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class SettingsWidget(QWidget):
@@ -53,6 +53,8 @@ class SettingsWidget(QWidget):
         self.quality.addItems(self.playblast.qualities)
 
         self.delete_images = QCheckBox()
+        self.create_video = QCheckBox()
+        self.open_explorer = QCheckBox()
 
         # Playblast Settings
         self.camera = QComboBox()
@@ -115,7 +117,9 @@ class SettingsWidget(QWidget):
         self.output_form_layout.addRow("File Name", self.file_name)
         self.output_form_layout.addRow("Output Path", self.output_layout)
         self.output_form_layout.addRow("Quality", self.quality)
+        self.output_form_layout.addRow("Create Video", self.create_video)
         self.output_form_layout.addRow("Delete Image Sequence", self.delete_images)
+        self.output_form_layout.addRow("Open Explorer", self.open_explorer)
 
         self.settings_form_layout.addRow("Camera", self.camera)
         self.settings_form_layout.addRow("Render Layer", self.render_layer)
@@ -150,6 +154,8 @@ class SettingsWidget(QWidget):
         self.quality.currentTextChanged.connect(self.set_quality)
         self.render_layer.currentTextChanged.connect(self.set_render_layer)
         self.delete_images.toggled.connect(self.set_delete_images)
+        self.create_video.toggled.connect(self.set_create_video)
+        self.open_explorer.toggled.connect(self.set_open_explorer)
 
     def init_state(self):
         self.playblast_name.setText(self.playblast.name)
@@ -172,6 +178,13 @@ class SettingsWidget(QWidget):
         self.render_offscreen.setChecked(self.playblast.offscreen)
         self.overscan.setChecked(self.playblast.overscan)
         self.delete_images.setChecked(self.playblast.delete_images)
+        self.create_video.setChecked(self.playblast.create_video)
+
+    def set_create_video(self, value: bool) -> None:
+        self.playblast.create_video = value
+
+    def set_open_explorer(self, value: bool) -> None:
+        self.playblast.open_explorer = value
 
     def set_delete_images(self, value: bool) -> None:
         self.playblast.delete_images = value
@@ -286,7 +299,9 @@ class SettingsWidget(QWidget):
         self.frame_range_box.blockSignals(False)
 
     def browse_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Output Folder")
+        folder = QFileDialog.getExistingDirectory(
+            self, "Select Output Folder", dir=maya_cmds.get_project_dir()
+        )
         if not folder:
             return
         self.output_path.setText(folder)

@@ -1,31 +1,32 @@
 from __future__ import annotations
-from pathlib import Path
-from datetime import datetime
-from typing import NamedTuple
-import sys
-from subprocess import Popen
 
-from PySide2.QtWidgets import (
-    QMainWindow,
-    QPushButton,
-    QScrollArea,
-    QStackedWidget,
-    QVBoxLayout,
-    QProgressBar,
-    QWidget,
-    QSplitter,
-)
-from maya import OpenMayaUI
-from shiboken2 import wrapInstance
-from PySide2.QtCore import Qt
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import NamedTuple
 
 from ghettoblaster.controller.logger import Logger
+from ghettoblaster.controller.maya_cmds import get_project_dir
 from ghettoblaster.controller.playblast import Playblast, PlayblastRenderer
-from ghettoblaster.ui.version import get_version
 from ghettoblaster.ui.playblast_widget import PlayblastWidget
 from ghettoblaster.ui.settings_widget import SettingsWidget
 from ghettoblaster.ui.toolbar import Toolbar
+from ghettoblaster.ui.version import get_version
+from maya import OpenMayaUI
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+from Qt.QtCompat import wrapInstance
+from Qt.QtCore import Qt
+from Qt.QtWidgets import (
+    QFileDialog,
+    QMainWindow,
+    QProgressBar,
+    QPushButton,
+    QScrollArea,
+    QSplitter,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 def get_maya_main_window():
@@ -61,7 +62,7 @@ class MainWindow(MayaQWidgetDockableMixin, QWidget):
         self.init_layouts()
         self.init_signals()
 
-        self.resize(700, 500)
+        self.resize(700, 525)
         self.add_playblast()
 
     @classmethod
@@ -124,6 +125,8 @@ class MainWindow(MayaQWidgetDockableMixin, QWidget):
         self.toolbar.check_all_btn.clicked.connect(self.check_all_playblasts)
         self.toolbar.uncheck_all_btn.clicked.connect(self.uncheck_all_playblasts)
         self.toolbar.reload_btn.clicked.connect(self.update_widgets)
+        self.toolbar.save_btn.clicked.connect(self.save)
+        self.toolbar.load_btn.clicked.connect(self.load)
         self.playblast_btn.clicked.connect(self.render_playblast)
 
     def add_playblast(self, playblast=None) -> PlayblastWidgets:
@@ -156,7 +159,7 @@ class MainWindow(MayaQWidgetDockableMixin, QWidget):
         pw.toggle_checked(toggle=True)
 
     def render_playblast(self):
-        pb = [
+        pb: list[Playblast] = [
             i.playblast.playblast
             for i in self._widgets
             if i.playblast.checkbox.isChecked()
@@ -164,9 +167,6 @@ class MainWindow(MayaQWidgetDockableMixin, QWidget):
 
         renderer = PlayblastRenderer(pb, lambda u: self.progress.setValue(u))
         renderer.batch_maya_render()
-
-        folder = Path(pb[0].filename).parent
-        self.open_folder(folder)
 
     def remove_playblast(self, pbw: PlayblastWidget):
         for i in self._widgets:
@@ -206,10 +206,32 @@ class MainWindow(MayaQWidgetDockableMixin, QWidget):
             i.settings.update_cameras()
             i.settings.update_render_layers()
 
-    def open_folder(self, folder: Path) -> None:
-        if sys.platform == "darwin":
-            with Popen(["open", folder]):
-                pass
-        elif sys.platform == "win32":
-            with Popen(f"explorer {folder}"):
-                pass
+    def save(self):
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Ghettoblaster Config",
+            filter="JSON (*.json)",
+            dir=get_project_dir(),
+        )
+        if not file:
+            return
+
+        playblasts = [p.settings.playblast.serialize() for p in self._widgets]
+        data = {"playblasts": playblasts}
+
+        with open(file, "w") as f:
+            f.write(json.dumps(data))
+
+    def load(self):
+        file, _ = QFileDialog.getOpenFileName(
+            self, "Save Ghettoblaster Config", dir=get_project_dir()
+        )
+        if not file:
+            return
+
+        with open(file, "r") as f:
+            data = json.load(f)
+
+        playblasts = [Playblast.deserialize(p) for _, v in data.items() for p in v]
+        for p in playblasts:
+            self.add_playblast(p)

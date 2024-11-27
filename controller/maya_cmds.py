@@ -1,6 +1,6 @@
-from maya import cmds
 from pathlib import Path
 
+from maya import cmds
 
 TIME_CONVERSION = {
     "game": 15,
@@ -67,8 +67,12 @@ def set_camera_overscan(camera: str, value: bool) -> None:
 
 def render_playblast(pb) -> None:
     actView = cmds.playblast(activeEditor=True)
-    cmds.modelEditor(actView, e=1, alo=False)
-    cmds.modelEditor(actView, e=1, pm=True)
+    cmds.modelEditor(actView, e=1, allObjects=False)
+    cmds.modelEditor(actView, e=1, polymeshes=True)
+    cmds.modelEditor(actView, e=1, particleInstancers=True)
+    cmds.modelEditor(actView, e=1, particleInstancers=True)
+    cmds.modelEditor(actView, e=1, pluginShapes=True)
+
     cmds.playblast(
         startTime=pb.start_frame,
         endTime=pb.end_frame,
@@ -83,4 +87,8 @@ def render_playblast(pb) -> None:
         percent=100,
         forceOverwrite=True,
     )
-    cmds.modelEditor(actView, e=1, alo=True)
+    cmds.modelEditor(actView, e=1, allObjects=True)
+
+
+def get_project_dir() -> str:
+    return cmds.workspace(q=True, rootDirectory=True)

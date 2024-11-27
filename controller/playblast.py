@@ -1,13 +1,15 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Callable, Optional
+
+import sys
 import time
+from pathlib import Path
+from subprocess import Popen
+from typing import Any, Callable, Optional
 
-from ghettoblaster.controller.data_classes import Resolution
-from ghettoblaster.controller import maya_cmds
-from ghettoblaster.controller.logger import Logger
 import cv2
-
+from ghettoblaster.controller import maya_cmds
+from ghettoblaster.controller.data_classes import Resolution
+from ghettoblaster.controller.logger import Logger
 
 RESOLUTIONS = (
     Resolution("HD_2160", 3840, 2160),
@@ -47,6 +49,8 @@ class Playblast:
         self.render_layer = "defaultRenderLayer"
         self.quality = "High"
         self.delete_images = False
+        self.create_video = True
+        self.open_explorer = False
 
     @property
     def cameras(self) -> list[str]:
@@ -87,7 +91,18 @@ class Playblast:
         pb = Playblast(self.id)
 
         for k, v in self.__dict__.items():
-            pb.__dict__[k] = v
+            setattr(pb, k, v)
+
+        return pb
+
+    def serialize(self) -> dict[str, Any]:
+        return self.__dict__
+
+    @classmethod
+    def deserialize(cls, pb_data: dict[str, Any]) -> Playblast:
+        pb = Playblast(pb_data["id"])
+        for k, v in pb_data.items():
+            setattr(pb, k, v)
 
         return pb
 
@@ -100,15 +115,21 @@ class PlayblastRenderer:
     def batch_maya_render(self):
         self.update_progress(0)
         for i, p in enumerate(self.playblasts, start=1):
-            start_time = time.perf_counter()
+            start = time.perf_counter()
             Logger.info(f"Starting Playblast for {p.name}")
             self.maya_render(p)
-            self.video_render(p)
-            stop_time = time.perf_counter()
-            Logger.info(
-                f"Finished Playblast for {p.name} in {stop_time - start_time:.2f}s"
-            )
-            self.update_progress(int((i / len(self.playblasts)) * 100))
+
+            self.update_progress((i // len(self.playblasts) // 2) * 100)
+            if p.create_video:
+                self.video_render(p)
+
+            if p.open_explorer:
+                folder = Path(p.filename).parent
+                self.open_folder(folder)
+
+            stop = time.perf_counter()
+            Logger.info(f"Finished Playblast for {p.name} in {stop - start:.2f}s")
+            self.update_progress((i // len(self.playblasts) * 100))
 
     def maya_render(self, pb: Playblast):
         maya_cmds.set_active_camera(pb.camera)
@@ -140,3 +161,11 @@ class PlayblastRenderer:
 
         cv2.destroyAllWindows()
         video.release()
+
+    def open_folder(self, folder: Path) -> None:
+        if sys.platform == "darwin":
+            with Popen(["open", folder]):
+                pass
+        elif sys.platform == "win32":
+            with Popen(["explorer", folder]):
+                pass

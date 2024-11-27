@@ -1,7 +1,7 @@
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QHBoxLayout, QWidget
 from ghettoblaster.ui.buttons import IconButton
 from ghettoblaster.ui.separator import VLine
+from Qt.QtCore import Qt
+from Qt.QtWidgets import QHBoxLayout, QWidget
 
 
 class Toolbar(QWidget):
@@ -54,6 +54,12 @@ class Toolbar(QWidget):
         self.reload_btn = IconButton(b)
         self.reload_btn.set_icon(":icons/tabler-icon-reload.png", i)
         self.reload_btn.setToolTip("Refresh camera and render layer lists")
+        self.save_btn = IconButton(b)
+        self.save_btn.set_icon(":icons/device-floppy.png", i)
+        self.save_btn.setToolTip("Save Playblast")
+        self.load_btn = IconButton(b)
+        self.load_btn.set_icon(":icons/folder-open.png", i)
+        self.load_btn.setToolTip("Load Playblast")
 
     def init_layouts(self) -> None:
         self.main_layout = QHBoxLayout(self)
@@ -65,6 +71,9 @@ class Toolbar(QWidget):
         self.main_layout.addWidget(self.uncheck_all_btn)
         self.main_layout.addWidget(VLine())
         self.main_layout.addWidget(self.reload_btn)
+        self.main_layout.addWidget(VLine())
+        self.main_layout.addWidget(self.save_btn)
+        self.main_layout.addWidget(self.load_btn)
         self.main_layout.addStretch()
 
     def init_signals(self):

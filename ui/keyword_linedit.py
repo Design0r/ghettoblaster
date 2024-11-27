@@ -1,6 +1,6 @@
 from typing import Iterable
-from PySide2.QtWidgets import QLineEdit, QAction, QMenu
-from PySide2.QtCore import Qt
+from Qt.QtWidgets import QLineEdit, QAction, QMenu
+from Qt.QtCore import Qt
 from functools import partial
 
 
@@ -16,7 +16,9 @@ class KeywordLineedit(QLineEdit):
         pop_menu = QMenu(self)
 
         for i in self.keywords:
-            description = f"Insert {i.replace('<', '').replace('>', '').lower()} name"
+            description = (
+                f"Insert {i.replace('<', '').replace('>', '').lower()} name {i}"
+            )
             action = QAction(description, self)
             action.triggered.connect(partial(self.insert_keyword, i))
             pop_menu.addAction(action)

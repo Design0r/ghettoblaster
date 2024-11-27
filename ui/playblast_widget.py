@@ -1,14 +1,14 @@
 from __future__ import annotations
-from PySide2.QtWidgets import (
-    QLabel,
-    QHBoxLayout,
-    QWidget,
-    QCheckBox,
-)
-from PySide2.QtCore import Qt, Signal
 
 from ghettoblaster.controller.playblast import Playblast
 from ghettoblaster.ui.buttons import IconButton
+from Qt.QtCore import Qt, Signal
+from Qt.QtWidgets import (
+    QCheckBox,
+    QHBoxLayout,
+    QLabel,
+    QWidget,
+)
 
 
 class PlayblastWidget(QWidget):

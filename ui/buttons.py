@@ -1,6 +1,6 @@
-from PySide2.QtWidgets import QPushButton, QApplication
-from PySide2.QtCore import Signal, Qt, QSize
-from PySide2.QtGui import QIcon
+from Qt.QtWidgets import QPushButton, QApplication
+from Qt.QtCore import Signal, Qt, QSize
+from Qt.QtGui import QIcon
 
 
 class IconButton(QPushButton):
