@@ -6,13 +6,14 @@
 
 ### Description
 
-Ghettoblaster is a Multilayer Playblasting Tool for Maya written in Python using PySide2.
+Ghettoblaster is a Multilayer Playblasting Tool for Maya written in Python using PySide.
 
 - Support for Render Layers
 - Create Multiple Playblast Layers and Settings and batch render them all at once!
 - Automatically Convert the Playblast to a MP4 Video
 - Control Playblast Settings
 - Dynamic Naming Controls
+- Support for PySide2 (Pre Maya 2025) and PySide6 with Qt.py
 
 ### Requirements
 
